@@ -2,9 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   env: {
-    DATABASE_URL:
-      process.env.DATABASE_URL ||
-      'postgresql://neondb_owner:npg_71NBtemKqaXR@ep-floral-base-a5sl2xzq-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require',
+    DATABASE_URL: process.env.DATABASE_URL,
     VAPI_WORKFLOW_ID: process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID,
     VAPI_API_KEY: process.env.NEXT_PUBLIC_VAPI_API_KEY,
   },
