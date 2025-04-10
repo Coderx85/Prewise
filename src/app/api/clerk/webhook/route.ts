@@ -3,7 +3,7 @@ import { APIErrorResponse, APIResponse } from '@/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
-export async function GET(
+export async function POST(
   req: NextRequest
 ): Promise<NextResponse<APIResponse<User> | APIErrorResponse>> {
   try {
@@ -60,7 +60,7 @@ export async function GET(
     }
 
     // update user if they exist
-    await db
+    const [updatedUser] = await db
       .update(usersTable)
       .set({
         name,
@@ -68,11 +68,11 @@ export async function GET(
         updatedAt: new Date(updatedAt),
       })
       .where(eq(usersTable.id, id))
-      .execute();
+      .returning();
 
     // Fetch the updated user data
     return NextResponse.json({
-      data: user,
+      data: updatedUser,
       message: 'User updated successfully',
       success: true,
       timestamp: new Date().toISOString(),
