@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 
 const protectedRoute = createRouteMatcher(['/interview/:path*']);
 
-const API_KEY: string = process.env.NEXT_PUBLIC_ARCJET_KEY!;
+const API_KEY: string = process.env.NEXT_PUBLIC_ARCJET_KEY || '';
 
 const aj = arcjet({
   key: API_KEY,
