@@ -4,20 +4,17 @@ import Agent from '@/components/Agent';
 import { getRandomInterviewCover } from '@/lib';
 import { getFeedbackByInterviewId, getInterviewById } from '@/actions';
 import DisplayTechIcons from '@/components/DisplayTechIcons';
-import { currentUser } from '@clerk/nextjs/server';
 import { RouteParams } from '@/types';
+import { currentUser } from '@clerk/nextjs/server';
 import { Metadata } from 'next';
 
-const user = await currentUser();
-
-export async function metadata(): Promise<Metadata> {
-  return {
-    title: `AI Interview with ${user?.fullName}`,
-    description: 'AI Interview with AI-Powered Practice & Feedback',
-  };
-}
+export const metadata: Metadata = {
+  title: 'Interview with AI',
+  description: 'Interview details and feedback',
+};
 
 const InterviewDetails = async ({ params }: RouteParams) => {
+  const user = await currentUser();
   const { id } = await params;
 
   if (!id) {
