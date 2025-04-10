@@ -1,16 +1,19 @@
 import { db, User, usersTable } from '@/lib';
 import { APIErrorResponse, APIResponse } from '@/types';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
 export async function POST(
-  req: NextRequest
+  req: Request
 ): Promise<NextResponse<APIResponse<User> | APIErrorResponse>> {
   try {
     const body = await req.json();
-    const { id, name, email, createdAt, updatedAt } = body.data;
 
-    if (!id || !name || !email) {
+    if (
+      !body?.data?.id ||
+      !body?.data?.email_addresses?.[0]?.email_address ||
+      !body?.data?.first_name
+    ) {
       return NextResponse.json({
         error: 'Missing required fields',
         success: false,
@@ -18,6 +21,12 @@ export async function POST(
         statusCode: 400,
       });
     }
+
+    const id = body.data.id;
+    const email = body.data.email_addresses[0].email_address;
+    const name = `${body.data.first_name} ${body.data.last_name || ''}`.trim();
+    const createdAt = body.data.created_at;
+    const updatedAt = body.data.updated_at;
 
     // Check if the user already exists in the database
     const [user] = await db
