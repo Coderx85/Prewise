@@ -1,11 +1,8 @@
-import { db, User, usersTable } from '@/lib';
-import { APIErrorResponse, APIResponse } from '@/types';
+import { db, usersTable } from '@/lib';
 import { NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
-export async function POST(
-  req: Request
-): Promise<NextResponse<APIResponse<User> | APIErrorResponse>> {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
 
@@ -14,12 +11,7 @@ export async function POST(
       !body?.data?.email_addresses?.[0]?.email_address ||
       !body?.data?.first_name
     ) {
-      return NextResponse.json({
-        error: 'Missing required fields',
-        success: false,
-        timestamp: new Date().toISOString(),
-        statusCode: 400,
-      });
+      return '';
     }
 
     const id = body.data.id;
@@ -37,7 +29,7 @@ export async function POST(
 
     // Check if user exists in the database
     if (!user) {
-      const [newUser] = await db
+      await db
         .insert(usersTable)
         .values({
           id,
@@ -48,28 +40,16 @@ export async function POST(
         })
         .returning();
 
-      return NextResponse.json({
-        data: newUser,
-        message: 'User created successfully',
-        success: true,
-        timestamp: new Date().toISOString(),
-        statusCode: 201,
-      });
+      return new NextResponse('User created successfully', { status: 201 });
     }
 
     // Check previous user data and update if necessary
     if (user.name === name && user.email === email) {
-      return NextResponse.json({
-        data: user,
-        message: 'No changes made',
-        success: true,
-        timestamp: new Date().toISOString(),
-        statusCode: 200,
-      });
+      return new NextResponse('User already exists', { status: 200 });
     }
 
     // update user if they exist
-    const [updatedUser] = await db
+    await db
       .update(usersTable)
       .set({
         name,
@@ -80,20 +60,10 @@ export async function POST(
       .returning();
 
     // Fetch the updated user data
-    return NextResponse.json({
-      data: updatedUser,
-      message: 'User updated successfully',
-      success: true,
-      timestamp: new Date().toISOString(),
-      statusCode: 200,
-    });
+    return new NextResponse('User updated successfully', { status: 200 });
   } catch (error: unknown) {
-    return NextResponse.json({
-      error:
-        error instanceof Error ? error.message : 'An unknown error occurred',
-      success: false,
-      timestamp: new Date().toISOString(),
-      statusCode: 500,
+    return new NextResponse(`Internal Server Error:: ${error}`, {
+      status: 500,
     });
   }
 }
