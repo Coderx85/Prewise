@@ -3,8 +3,9 @@ import { google } from '@ai-sdk/google';
 
 import { db, getRandomInterviewCover, interviewsTable } from '@/lib';
 import { eq } from 'drizzle-orm';
+import { NextRequest } from 'next/server';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const { type, role, level, techstack, amount, userid } = await request.json();
 
   try {
@@ -36,8 +37,6 @@ export async function POST(request: Request) {
       coverImage: getRandomInterviewCover(),
       createdAt: new Date().toISOString(),
     };
-
-    // await db.collection("interviews").add(interview);
 
     await db
       .update(interviewsTable)
