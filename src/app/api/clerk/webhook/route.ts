@@ -4,13 +4,24 @@ import { eq } from 'drizzle-orm';
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { data } = body;
+    // Verify the webhook signature
+    const payload = await req.json();
+
+    // Type checking for webhook payload
+    if (!payload || typeof payload !== 'object') {
+      return new NextResponse('Invalid webhook payload', { status: 400 });
+    }
+
+    const { data } = payload;
+
+    if (!data || typeof data !== 'object') {
+      return new NextResponse('Invalid data in webhook payload', {
+        status: 400,
+      });
+    }
 
     const {
       id,
-      full_name,
-      user_name,
       email_addresses,
       first_name,
       last_name,
@@ -19,14 +30,6 @@ export async function POST(req: NextRequest) {
     } = data;
 
     const email = email_addresses?.[0]?.email_address;
-
-    console.log(`
-      Clerk webhook received:
-      Email Address: ${email}
-      Name: ${full_name}
-      Username: ${user_name}
-      Clerk ID: ${id}
-    `);
 
     // Validate required fields
     if (!id || !email || !first_name) {
@@ -75,3 +78,7 @@ export async function POST(req: NextRequest) {
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+
+// Configure the webhook to only accept POST requests
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
