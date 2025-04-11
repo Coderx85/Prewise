@@ -5,14 +5,30 @@ import { eq } from 'drizzle-orm';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const { data } = body;
+    console.log(
+      `
+      Clerk webhook received:: \n
+      Email Address: ${body.data.email_addresses[0].email_address} \n
+      Name: ${body.data.full_name} \n
+      UserName: ${body.data.user_name}}\n
+      Clerk ID: ${body.data.id}
+      `
+    );
 
-    const {
-      id,
-      email_addresses: email,
-      full_name: name,
-      createdAt,
-      updatedAt,
-    } = body?.data || {};
+    if (
+      !data?.id ||
+      !data?.email_addresses?.[0]?.email_address ||
+      !data?.first_name
+    ) {
+      return new NextResponse('Missing required fields', { status: 400 });
+    }
+
+    const id = data.id;
+    const email = data.email_addresses[0].email_address;
+    const name = `${data.first_name} ${data.last_name || ''}`.trim();
+    const createdAt = new Date(data.created_at);
+    const updatedAt = new Date(data.updated_at);
 
     // Check if the user already exists in the database
     const [user] = await db
