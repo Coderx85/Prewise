@@ -1,24 +1,18 @@
 import { db, usersTable } from '@/lib';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    if (
-      !body?.data?.id ||
-      !body?.data?.email_addresses?.[0]?.email_address ||
-      !body?.data?.first_name
-    ) {
-      return '';
-    }
-
-    const id = body.data.id;
-    const email = body.data.email_addresses[0].email_address;
-    const name = `${body.data.first_name} ${body.data.last_name || ''}`.trim();
-    const createdAt = body.data.created_at;
-    const updatedAt = body.data.updated_at;
+    const {
+      id,
+      email_addresses: email,
+      full_name: name,
+      createdAt,
+      updatedAt,
+    } = body?.data || {};
 
     // Check if the user already exists in the database
     const [user] = await db
